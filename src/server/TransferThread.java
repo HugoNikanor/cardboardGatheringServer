@@ -27,6 +27,7 @@ public class TransferThread implements Runnable {
 					this.wait( 1000 / 10 );
 				} catch (IOException e) {
 					e.printStackTrace();
+					running = false;
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
