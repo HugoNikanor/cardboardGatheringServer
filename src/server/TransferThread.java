@@ -6,14 +6,14 @@ import java.io.OutputStream;
 
 public class TransferThread implements Runnable {
 
-	private InputStream inStream;
 	private OutputStream outStream;
+	private InputStream inStream;
 
 	private boolean running;
 
 	public TransferThread( InputStream inStream, OutputStream outStream) {
-		this.inStream = inStream;
 		this.outStream = outStream;
+		this.inStream = inStream;
 
 	}
 	public void run() {
@@ -25,9 +25,8 @@ public class TransferThread implements Runnable {
 					System.out.println( this.hashCode() + " has sent info" );
 
 					this.wait( 1000 / 10 );
-				} catch (IOException e) {
-					e.printStackTrace();
-				} catch (InterruptedException e) {
+				} catch (IOException | InterruptedException e) {
+					running = false;
 					e.printStackTrace();
 				}
 
