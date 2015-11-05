@@ -22,14 +22,12 @@ public class TransferThread implements Runnable {
 			while( running ) {
 				try {
 					outStream.write( inStream.read() );
-					System.out.println( this.hashCode() + " has sent info" );
+					//System.out.println( this.hashCode() + " has sent info @ " + currentTimeMS() );
 
-					this.wait( 1000 / 10 );
-				} catch (IOException | InterruptedException e) {
+				} catch (IOException e) {
 					running = false;
 					e.printStackTrace();
 				}
-
 			}
 		}
 	}
