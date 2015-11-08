@@ -7,9 +7,9 @@ public class Main {
 		int port = 23732;
 		try {
 			port = Integer.parseInt(args[0]);
-		} catch( IndexOutOfBoundsException ioube ) {
+		} catch( IndexOutOfBoundsException | NumberFormatException e ) {
 		}
 
-		new Server( port );
+		new Server( port ).start();
 	}
 }

@@ -3,6 +3,7 @@ package server;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.SocketException;
 
 public class TransferThread implements Runnable {
 
@@ -16,14 +17,24 @@ public class TransferThread implements Runnable {
 		this.inStream = inStream;
 
 	}
+
+	@Override
 	public void run() {
 		synchronized( this ) {
 			running = true;
+			int data;
 			while( running ) {
 				try {
-					outStream.write( inStream.read() );
-					//System.out.println( this.hashCode() + " has sent info @ " + currentTimeMS() );
-
+					data = inStream.read();
+					if( data != -1 ) {
+						outStream.write( data );
+					} else {
+						System.out.println( "client disconnected" );
+						running = false;
+					}
+				} catch( SocketException e ) {
+					running = false;
+					System.out.println( "Socket closed" );
 				} catch (IOException e) {
 					running = false;
 					e.printStackTrace();

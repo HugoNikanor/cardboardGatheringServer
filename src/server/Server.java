@@ -8,7 +8,7 @@ import java.net.Socket;
 
 public class Server {
 
-	//private int port;
+	private int port;
 
 	private ServerSocket serverSocket;
 	private Socket[] connections = new Socket[2];
@@ -17,6 +17,10 @@ public class Server {
 	private InputStream[] inStreams = new InputStream[2];
 
 	private TransferThread[] transferThreads = new TransferThread[2];
+	//private Thread[] transferThreads = new Thread[2];
+
+	//private RestartThread[] restartThreads = new RestartThread[2];
+	private Thread[] restartThreads = new Thread[2];
 
 	public Server( int port ) {
 
@@ -28,8 +32,11 @@ public class Server {
 			}
 		});
 
-		//this.port = port;
+		this.port = port;
 
+	}
+
+	public void start() {
 		try {
 			serverSocket = new ServerSocket( port );
 			System.out.println( "Server started, waiting for cilents..." );
@@ -50,14 +57,59 @@ public class Server {
 		transferThreads[0] = new TransferThread( inStreams[0], outStreams[1] );
 		transferThreads[1] = new TransferThread( inStreams[1], outStreams[0] );
 
+		Thread tt0 = new Thread( transferThreads[0] );
+		Thread tt1 = new Thread( transferThreads[1] );
+
 		System.out.println( "transferThreads created" );
 
-		new Thread( transferThreads[0] ).start();
-		new Thread( transferThreads[1] ).start();
+		restartThreads[0] = new Thread(new RestartThread( tt0, 0 ));
+		restartThreads[1] = new Thread(new RestartThread( tt1, 1 ));
+
+		tt0.start();
+		tt1.start();
+
+		restartThreads[0].start();
+		restartThreads[1].start();
 
 		System.out.println( "Server setup completed" );
 	}
 
+	private class RestartThread implements Runnable {
+		private Thread rThread;
+
+		private int id;
+		public RestartThread( Thread threadToJoin, int id ) {
+			this.rThread = threadToJoin;
+			this.id = id;
+		}
+		@Override
+		public void run() {
+			try {
+				rThread.join();
+				System.out.println("TransferThread closed");
+				Server.this.close( id );
+				//Server.this.start();
+			} catch( InterruptedException e ) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+
+	public void close( int source ) {
+		try {
+			serverSocket.close();
+			connections[0].close();
+			connections[1].close();
+
+			transferThreads[0].setRunning( false );
+			transferThreads[1].setRunning( false );
+
+			restartThreads[source].interrupt();
+		} catch( IOException e ) {
+			e.printStackTrace();
+		}
+	}
 
 	/*
 	 * Cleanup, closes everything
@@ -71,6 +123,10 @@ public class Server {
 
 			transferThreads[0].setRunning( false );
 			transferThreads[1].setRunning( false );
+
+			restartThreads[0].interrupt();
+			restartThreads[1].interrupt();
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
