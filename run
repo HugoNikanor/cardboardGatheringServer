@@ -1,0 +1,6 @@
+#!/bin/bash
+
+while true; do
+	java -cp bin main.Main
+	sleep 2
+done
