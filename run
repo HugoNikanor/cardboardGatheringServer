@@ -1,7 +1,10 @@
 #!/bin/bash
 
 while true; do
-	echo "---------------------------------------------------------------------------------"
+	for x in $(seq $(tput cols)); do
+		echo -n "—"
+	done
+	echo ""
 	java -cp bin main.Main
 	sleep 2
 done
