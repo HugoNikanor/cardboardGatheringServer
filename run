@@ -5,6 +5,6 @@ while true; do
 		echo -n "—"
 	done
 	echo ""
-	java -cp bin main.Main
+	java -cp bin main.Main $1
 	sleep 2
 done
